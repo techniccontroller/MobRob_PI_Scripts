@@ -1,0 +1,3 @@
+[submodule "rplidar_sdk"]
+	path = rplidar_sdk
+	url = /home/pi/Desktop/MobRob/RPLIDAR/rplidar_sdk
