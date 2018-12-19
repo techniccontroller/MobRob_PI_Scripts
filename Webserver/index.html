@@ -1,0 +1,346 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+
+		<title>Drag and drop, automatic upload</title>
+		<style>
+			#holder1 { 
+				outline: 10px dashed #ccc;
+				outline-offset: -10px; 
+				width: 100%; 
+				min-height: 180px; 
+				margin: 10px auto;
+				padding: 5px 0px;
+				font-size: 1em;
+				color: grey;
+				text-align: center;
+			}
+			#holder1.hover { 
+				outline: 10px dashed #0c0; 
+			}
+			#holder1 img{ 
+				display: block; 
+				margin: 10px auto; 
+			}
+			#holder1 p{ 
+				margin: 10px; 
+				font-size: 14px; 
+			}
+			progress { 
+				width: 100%; 
+			}
+			progress:after { 
+				content: '%'; 
+			}
+			.fail { 
+				background: #c00; 
+				padding: 2px; 
+				color: #fff; 
+			}
+			.hidden { 
+				display: none !important;
+			}
+
+			.button {
+				background-color: #4CAF50; /* Green */
+				border: none;
+				color: white;
+				padding: 10px 20px;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				cursor: pointer;
+				display:inline-block;
+			}
+
+			.button2 {
+				background-color: #4CAF50; /* Green */
+				border: none;
+				color: white;
+				padding: 5px 20px;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				margin: 0px 0px;
+				cursor: pointer;
+				display:inline-block;
+				font: 400 13.3333px Arial;
+			}
+
+			.btnRight{
+				float: right;
+			}
+
+			.button:hover {
+				box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+			}
+
+			#remotecontrol_wrapper {
+				width: 100%;
+				text-align: center;
+			}
+			#remotecontrol_table {
+				display: inline-block;
+				width: 50%;
+			}
+			.remotecontrolkey{
+				width: 50px;
+				height: 50px;
+			}
+			
+			
+			.square {
+				float:left;
+				position: relative;
+				width: 30%;
+				padding-bottom : 30%; /* = width for a 1:1 aspect ratio */
+				margin:1.66%;
+				background-color:#ccc;
+				overflow:hidden;
+			}
+			
+			.placeholder {
+				float:left;
+				position: relative;
+				width: 30%;
+				padding-bottom : 30%; /* = width for a 1:1 aspect ratio */
+				margin:1.66%;
+				background-color:transparent;
+				overflow:hidden;
+			}
+			
+			.square:hover{
+				box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19); 
+			}
+
+			.content {
+				position:absolute;
+				height:90%; /* = 100% - 2*5% padding */
+				width:90%; /* = 100% - 2*5% padding */
+				padding: 5%;
+				font-size: 8vw;
+				display: grid;
+			}
+			.content i{
+				margin: auto;
+				color: red;
+			}
+			
+			.content div input {
+				height: 40%;
+				text-align: center;
+				font-size: 4vw;
+				width: 100%;
+				margin-top: 5%;
+			}
+			.content div {
+				text-align: center;
+				font-size: 2vw;
+				width: 100%;
+				margin: auto;
+				font-weight: 600;
+			}
+		</style>
+	</head>
+	<body>
+
+		<article style="font-family: arial;">
+		  <input class="button btnRight" type="button" style="margin: 4px 10px" onclick="location.href='shutdown';" value="Shutdown Raspberry Pi" />
+		  <h1 style="padding-left: 10px;">Drag an hex-file from your computer onto the drop zones to automatically flash Arduino Mega</h1>
+		  <div style="width: 100%; display: table;">
+			<div style="display: table-row; padding: 10px;">
+				<div style="display: table-cell; padding:10px;">
+					<h3>MobRob:<input type="file" id="fileElem1" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files, '/postArduinoCode', 'holder1')"><a class="button2 btnRight" href="#" id="fileSelect1">Choose Files...</a></h3>
+					<div id="holder1"><br>Drag and drop an hex-file here...</div>
+				</div>
+			</div>
+		  </div>
+		  <p id="upload" class="hidden">Drag & drop not supported</p>
+		  <p id="filereader">File API & FileReader API not supported</p>
+		  <p id="formdata">XHR2's FormData is not supported</p>
+		  <p id="progress">XHR2's upload progress isn't supported</p>
+		  <p>Upload progress: <progress id="uploadprogress" max="100" value="0">0</progress></p>
+		  
+		  <div id="remotecontrol_wrapper">
+			<div id="remotecontrol_table">
+				<!--<div style="display: table; width:70%">
+					<div style="display: table-row">
+						<div style="display: table-cell; padding:10px;" class="remotecontrolkey"><i class="fas fa-arrow-right"></i></div>
+						<div style="display: table-cell; padding:10px;" class="remotecontrolkey">Smith</div> 
+						<div style="display: table-cell; padding:10px;" class="remotecontrolkey">50</div>
+					</div>
+					<div style="display: table-row">
+						<div style="display: table-cell; padding:10px;" class="remotecontrolkey"><i class="fas fa-arrow-right"></i></div>
+						<div style="display: table-cell; padding:10px;" class="remotecontrolkey">Smith</div> 
+						<div style="display: table-cell; padding:10px;" class="remotecontrolkey">50</div>
+					</div>
+				</div>-->
+				<!-- 1st row */ -->
+				<div class="square"><div class="content" onclick="sendCommand('q')"><i class="fas fa-arrow-up" style="transform: rotate(-45deg);"></i></div></div>
+				<div class="square"><div class="content" onclick="sendCommand('w')"><i class="fas fa-arrow-up"></i></div></div>
+				<div class="square"><div class="content" onclick="sendCommand('e')"><i class="fas fa-arrow-up" style="transform: rotate(45deg);"></i></div></div>
+				<!-- 2nd row */ -->
+				<div class="square"><div class="content" onclick="sendCommand('a')"><i class="fas fa-arrow-left"></i></div></div>
+				<div class="placeholder"><div class="content"><div>Degrees:<input id="degrees" type="text" value="180"></div></div></div>
+				<div class="square"><div class="content" onclick="sendCommand('d')"><i class="fas fa-arrow-right"></i></div></div>
+				<!-- 3rd row */ -->
+				<div class="square"><div class="content" onclick="sendCommand('y')"><i class="fas fa-arrow-up" style="transform: rotate(-135deg);"></i></div></div>
+				<div class="square"><div class="content" onclick="sendCommand('s')"><i class="fas fa-arrow-down"></i></div></div>
+				<div class="square"><div class="content" onclick="sendCommand('c')"><i class="fas fa-arrow-up" style="transform: rotate(135deg);"></i></div></div>
+				
+				<div class="placeholder" style="width: 15%"><div class="content"></div></div>
+				<div class="square"><div class="content" onclick="sendCommand('r')"><i class="fas fa-undo"></i></div></div>
+				<div class="square"><div class="content" onclick="sendCommand('t')"><i class="fas fa-redo"></i></div></div>
+			</div>
+		  </div>
+
+		</article>
+		<script>
+		// Initialise all variables and elements
+		var holder1 = document.getElementById('holder1'),
+			tests = {
+			  filereader: typeof FileReader != 'undefined',
+			  dnd: 'draggable' in document.createElement('span'),
+			  formdata: !!window.FormData,
+			  progress: "upload" in new XMLHttpRequest
+			}, 
+			support = {
+			  filereader: document.getElementById('filereader'),
+			  formdata: document.getElementById('formdata'),
+			  progress: document.getElementById('progress')
+			},
+			acceptedTypes = {
+			  'image/png': true,
+			  'image/jpeg': true,
+			  'image/gif': true
+			},
+			progress = document.getElementById('uploadprogress'),
+			fileupload = document.getElementById('upload');
+
+		// Deaktivate elements if not supported from the browser	
+		"filereader formdata progress".split(' ').forEach(function (api) {
+		  if (tests[api] === false) {
+			support[api].className = 'fail';
+		  } else {
+			support[api].className = 'hidden';
+		  }
+		});
+
+		// show preview image in drag zones (holders)
+		function previewfile(file, myholder) {
+			while(myholder.hasChildNodes()){
+				myholder.removeChild(myholder.firstChild);
+			}
+			if (tests.filereader === true && acceptedTypes[file.type] === true) {
+				var reader = new FileReader();
+				reader.onload = function (event) {
+					var image = new Image();
+					image.src = event.target.result;
+					image.width = 250; // a fake resize
+					myholder.appendChild(image);
+				};
+				reader.readAsDataURL(file);
+			}  else {
+				myholder.innerHTML += '<p>Uploaded ' + file.name + ' ' + (file.size ? (file.size/1024|0) + 'K' : '');
+				console.log(file);
+			}
+		}
+
+		// upload file to the webserver as POST request
+		function uploadfile(file, command) {
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', command);
+			xhr.setRequestHeader('filename', file.name);
+			xhr.onload = function() {
+				progress.value = progress.innerHTML = 100;
+			};
+			if (tests.progress) {
+				xhr.upload.onprogress = function (event) {
+					if (event.lengthComputable) {
+						var complete = (event.loaded / event.total * 100 | 0);
+						progress.value = progress.innerHTML = complete;
+					}
+				}
+			}
+			console.log(file.name);
+			xhr.send(file);
+		}
+
+		// handle all files, which are selected with the file browser
+		function handleFiles(files, command, holder){
+			for(i = 0; i < files.length; i++){
+				uploadfile(files[i], command);
+			}
+			previewfile(files[files.length-1], document.getElementById(holder));
+		}
+
+		// implement drag and drop functionality for holder1
+		if (tests.dnd) { 
+		  holder1.ondragover = function () { this.className = 'hover'; return false; };
+		  holder1.ondragend = function () { this.className = ''; return false; };
+		  holder1.ondrop = function (e) {
+			this.className = '';
+			e.preventDefault();
+			for(i = 0; i < e.dataTransfer.files.length; i++){
+				uploadfile(e.dataTransfer.files[i], '/postArduinoCode');
+			}
+			previewfile(e.dataTransfer.files[e.dataTransfer.files.length-1], this);
+		  }
+		} else {
+		  fileupload.className = 'hidden';
+		}
+
+		// code for file browser 1
+		var fileSelect1 = document.getElementById("fileSelect1");
+		var fileElem = document.getElementById("fileElem");
+		fileSelect1.addEventListener("click", function (e) {
+		  if (fileElem1) {
+			fileElem1.click();
+		  }
+		  e.preventDefault(); // prevent navigation to "#"
+		}, false);
+		
+		
+		// Send command to webserver
+		function sendCommand(command) {
+			var degrees = document.getElementById("degrees").value;
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', 'command' + command + degrees);
+			xhr.send();
+		}
+		
+		window.addEventListener('keydown',this.checkKeyDown,false);
+		window.addEventListener('keyup',this.checkKeyUp,false);
+		
+		var keyisdown = false;
+		
+		function checkKeyDown(e) {
+			var code = e.keyCode;
+			if(keyisdown == false){
+				switch (code) {
+					case 87: sendCommand('w'); break; //W
+					case 83: sendCommand('s'); break; //S
+					case 65: sendCommand('a'); break; //A
+					case 68: sendCommand('d'); break; //D
+					case 81: sendCommand('q'); break; //Q
+					case 69: sendCommand('e'); break; //E
+					case 89: sendCommand('y'); break; //Y
+					case 67: sendCommand('c'); break; //C
+					case 82: sendCommand('r'); break; //R
+					case 84: sendCommand('t'); break; //T
+				}
+				keyisdown = true;
+			}
+		}
+		
+		function checkKeyUp(e) {
+			sendCommand('x');
+			keyisdown = false;
+		}
+		</script>
+	</body>
+</html>
+
+
