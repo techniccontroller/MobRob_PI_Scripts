@@ -178,21 +178,21 @@
 					</div>
 				</div>-->
 				<!-- 1st row */ -->
-				<div class="square"><div class="content" onclick="sendCommand('q')"><i class="fas fa-arrow-up" style="transform: rotate(-45deg);"></i></div></div>
-				<div class="square"><div class="content" onclick="sendCommand('w')"><i class="fas fa-arrow-up"></i></div></div>
-				<div class="square"><div class="content" onclick="sendCommand('e')"><i class="fas fa-arrow-up" style="transform: rotate(45deg);"></i></div></div>
+				<div class="square"><div class="content" onmousedown="sendCommand('speed(60,-45,0)')" onmouseup="sendCommand('stop()')"><i class="fas fa-arrow-up" style="transform: rotate(-45deg);"></i></div></div>
+				<div class="square"><div class="content" onmousedown="sendCommand('speed(60,0,0)')" onmouseup="sendCommand('stop()')"><i class="fas fa-arrow-up"></i></div></div>
+				<div class="square"><div class="content" onmousedown="sendCommand('speed(60,45,0)')" onmouseup="sendCommand('stop()')"><i class="fas fa-arrow-up" style="transform: rotate(45deg);"></i></div></div>
 				<!-- 2nd row */ -->
-				<div class="square"><div class="content" onclick="sendCommand('a')"><i class="fas fa-arrow-left"></i></div></div>
-				<div class="placeholder"><div class="content"><div>Degrees:<input id="degrees" type="text" value="180"></div></div></div>
-				<div class="square"><div class="content" onclick="sendCommand('d')"><i class="fas fa-arrow-right"></i></div></div>
+				<div class="square"><div class="content" onmousedown="sendCommand('speed(60,-90,0)')" onmouseup="sendCommand('stop()')"><i class="fas fa-arrow-left"></i></div></div>
+				<div class="placeholder"><div class="content"></div></div>
+				<div class="square"><div class="content" onmousedown="sendCommand('speed(60,90,0)')" onmouseup="sendCommand('stop()')"><i class="fas fa-arrow-right"></i></div></div>
 				<!-- 3rd row */ -->
-				<div class="square"><div class="content" onclick="sendCommand('y')"><i class="fas fa-arrow-up" style="transform: rotate(-135deg);"></i></div></div>
-				<div class="square"><div class="content" onclick="sendCommand('s')"><i class="fas fa-arrow-down"></i></div></div>
-				<div class="square"><div class="content" onclick="sendCommand('c')"><i class="fas fa-arrow-up" style="transform: rotate(135deg);"></i></div></div>
+				<div class="square"><div class="content" onmousedown="sendCommand('speed(60,-135,0)')" onmouseup="sendCommand('stop()')"><i class="fas fa-arrow-up" style="transform: rotate(-135deg);"></i></div></div>
+				<div class="square"><div class="content" onmousedown="sendCommand('speed(60,180,0)')" onmouseup="sendCommand('stop()')"><i class="fas fa-arrow-down"></i></div></div>
+				<div class="square"><div class="content" onmousedown="sendCommand('speed(60,135,0)')" onmouseup="sendCommand('stop()')"><i class="fas fa-arrow-up" style="transform: rotate(135deg);"></i></div></div>
 				
 				<div class="placeholder" style="width: 15%"><div class="content"></div></div>
-				<div class="square"><div class="content" onclick="sendCommand('r')"><i class="fas fa-undo"></i></div></div>
-				<div class="square"><div class="content" onclick="sendCommand('t')"><i class="fas fa-redo"></i></div></div>
+				<div class="square"><div class="content" onmousedown="sendCommand('speed(0,0,60)')" onmouseup="sendCommand('stop()')"><i class="fas fa-undo"></i></div></div>
+				<div class="square"><div class="content" onmousedown="sendCommand('speed(0,0,-60)')" onmouseup="sendCommand('stop()')"><i class="fas fa-redo"></i></div></div>
 			</div>
 		  </div>
 
@@ -305,9 +305,8 @@
 		
 		// Send command to webserver
 		function sendCommand(command) {
-			var degrees = document.getElementById("degrees").value;
 			var xhr = new XMLHttpRequest();
-			xhr.open('GET', 'command' + command + degrees);
+			xhr.open('GET', 'command' + command);
 			xhr.send();
 		}
 		
@@ -320,16 +319,16 @@
 			var code = e.keyCode;
 			if(keyisdown == false){
 				switch (code) {
-					case 87: sendCommand('w'); break; //W
-					case 83: sendCommand('s'); break; //S
-					case 65: sendCommand('a'); break; //A
-					case 68: sendCommand('d'); break; //D
-					case 81: sendCommand('q'); break; //Q
-					case 69: sendCommand('e'); break; //E
-					case 89: sendCommand('y'); break; //Y
-					case 67: sendCommand('c'); break; //C
-					case 82: sendCommand('r'); break; //R
-					case 84: sendCommand('t'); break; //T
+					case 87: sendCommand('speed(60,0,0)'); break; //W
+					case 83: sendCommand('speed(60,180,0)'); break; //S
+					case 65: sendCommand('speed(60,-90,0)'); break; //A
+					case 68: sendCommand('speed(60,90,0)'); break; //D
+					case 81: sendCommand('speed(60,-45,0)'); break; //Q
+					case 69: sendCommand('speed(60,45,0)'); break; //E
+					case 89: sendCommand('speed(60,-135,0)'); break; //Y
+					case 67: sendCommand('speed(60,135,0)'); break; //C
+					case 82: sendCommand('speed(0,0,60)'); break; //R
+					case 84: sendCommand('speed(0,0,-60)'); break; //T
 				}
 				keyisdown = true;
 			}

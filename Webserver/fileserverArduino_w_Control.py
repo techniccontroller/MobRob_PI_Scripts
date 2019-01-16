@@ -24,8 +24,8 @@ class MyHandler(BaseHTTPRequestHandler):
 			client.end_headers()
 			client.wfile.write(load('index.html'))
 		elif client.path.startswith("/command"):
-			print('send command: ' + client.path[8])
-			s.write(client.path[8:]+"e")
+			print('send command: ' + client.path[8:])
+			s.write(client.path[8:]+"\n")
 			response = s.readline()
 			print (response)
 			client.send_response(200)
