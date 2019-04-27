@@ -44,6 +44,19 @@ class MyHandler(BaseHTTPRequestHandler):
 			client.send_response(200)
 			client.end_headers();
 			call("avrdude -C/usr/share/arduino/hardware/tools/avrdude.conf -v -patmega2560 -cwiring -P/dev/arduino -b115200 -D -Uflash:w:" + datapath + filename + ":i", shell = True)
+		elif client.path == "/postAttinyISPCode":
+			# a new file for Arduino is coming
+			length = client.headers['content-length']
+			data = client.rfile.read(int(length))
+			contentType = client.headers.get('Content-Type')
+			filename = client.headers.get('filename')
+			open(datapath + filename, 'wb').write(data)
+			client.send_response(200)
+			client.end_headers();
+			call("sudo gpio -g mode 22 out", shell = True)
+			call("sudo gpio -g write 22 0", shell = True)
+			call("sudo avrdude -c linuxspi -P /dev/spidev0.0 -p t84 -b 19200 -Uflash:w:" + datapath + filename + ":i", shell = True)
+			call("sudo gpio -g write 22 1", shell = True)
 			
 def load(file):
 	with open(file) as file:
