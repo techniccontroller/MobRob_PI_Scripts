@@ -1,6 +1,6 @@
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import subprocess
-from subprocess import call
+from subprocess import call, PIPE
 import serial
 import time
 
@@ -41,9 +41,16 @@ class MyHandler(BaseHTTPRequestHandler):
 			contentType = client.headers.get('Content-Type')
 			filename = client.headers.get('filename')
 			open(datapath + filename, 'wb').write(data)
+			cmd = "avrdude -C/usr/share/arduino/hardware/tools/avrdude.conf -v -patmega2560 -cwiring -P/dev/arduino -b115200 -D -Uflash:w:" + datapath + filename + ":i"
+			print(cmd)
+			proc = subprocess.Popen(cmd, stderr=PIPE, shell = True)
+			res = read_stderr(proc)
+			print("Output: " + res)
 			client.send_response(200)
+			client.send_header('Content-type', 'text/html')
 			client.end_headers();
-			call("avrdude -C/usr/share/arduino/hardware/tools/avrdude.conf -v -patmega2560 -cwiring -P/dev/arduino -b115200 -D -Uflash:w:" + datapath + filename + ":i", shell = True)
+			client.wfile.write(res)
+
 		elif client.path == "/postAttinyISPCode":
 			# a new file for Arduino is coming
 			length = client.headers['content-length']
@@ -51,12 +58,30 @@ class MyHandler(BaseHTTPRequestHandler):
 			contentType = client.headers.get('Content-Type')
 			filename = client.headers.get('filename')
 			open(datapath + filename, 'wb').write(data)
-			client.send_response(200)
-			client.end_headers();
 			call("sudo gpio -g mode 22 out", shell = True)
 			call("sudo gpio -g write 22 0", shell = True)
-			call("sudo avrdude -c linuxspi -P /dev/spidev0.0 -p t84 -b 19200 -Uflash:w:" + datapath + filename + ":i", shell = True)
+			cmd = "sudo avrdude -c linuxspi -P /dev/spidev0.0 -p t84 -b 19200 -Uflash:w:" + datapath + filename + ":i"
+			print(cmd)
+			proc = subprocess.Popen(cmd , stderr=PIPE, shell = True)
+			res = read_stderr(proc)
+			print("Output: " + res)
+			client.send_response(200)
+			client.send_header('Content-type', 'text/html')
+			client.end_headers();
+			client.wfile.write(res)
 			call("sudo gpio -g write 22 1", shell = True)
+
+
+def read_stderr(proc):
+	res = ""
+	while True:
+		line = proc.stderr.readline()
+		if line != '':
+			res += line
+		else:
+			print("end")
+			break
+	return res			
 			
 def load(file):
 	with open(file) as file:
