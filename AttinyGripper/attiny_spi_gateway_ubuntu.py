@@ -9,14 +9,13 @@ TCP_IP = '192.168.0.116'
 TCP_PORT = 5044
 
 # Reset Attiny
-#call("sudo gpio -g mode 22 out", shell = True)
-#call("sudo gpio -g write 22 0", shell = True)
-#time.sleep(0.1)
-#call("sudo gpio -g write 22 1", shell = True)
-
-call("sudo raspi-gpio set 22 op dl", shell = True)
+call("gpio -g mode 22 out", shell = True)
+call("gpio -g write 22 0", shell = True)
 time.sleep(0.1)
-call("sudo raspi-gpio set 22 op dh", shell = True)
+call("gpio -g write 22 1", shell = True)
+#call("sudo raspi-gpio set 22 op dl", shell = True)
+#time.sleep(0.1)
+#call("sudo raspi-gpio set 22 op dh", shell = True)
 
 # Open SPI interface
 spi = spidev.SpiDev()
@@ -36,13 +35,14 @@ while(True):
 	conn, addr = sock.accept()
 	print("Connected: " + addr[0]);
 	conn.setblocking(1)
-	#call("sudo gpio -g mode 22 out", shell = True)
-	#call("sudo gpio -g write 22 0", shell = True)
+
+	#call("sudo raspi-gpio set 22 op dl", shell = True)
 	#time.sleep(0.1)
-	#call("sudo gpio -g write 22 1", shell = True)
-	call("sudo raspi-gpio set 22 op dl", shell = True)
+	#call("sudo raspi-gpio set 22 op dh", shell = True)
+	call("gpio -g mode 22 out", shell = True)
+	call("gpio -g write 22 0", shell = True)
 	time.sleep(0.1)
-	call("sudo raspi-gpio set 22 op dh", shell = True)
+	call("gpio -g write 22 1", shell = True)
 	while(True):
 		try:
 			print 'Waiting for incoming data from TCP client...'
@@ -74,6 +74,7 @@ while(True):
 						str += chr(i)
 					str += '\n'
 					print "attiny-res: ", str[1:]
+					conn.send(str[1:])
 			else:
 				# connection was closed by client -> exit loop
 				print 'connection was closed by client'
