@@ -4,7 +4,7 @@ from subprocess import call, PIPE
 import time
 
 # path to the folder with the temporary stored file
-datapath ="data/"
+datapath =""
 
 
 class MyHandler(BaseHTTPRequestHandler):	
