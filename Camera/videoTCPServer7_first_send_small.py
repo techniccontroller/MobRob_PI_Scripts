@@ -8,8 +8,18 @@ import base64
 # run 
 # sudo iwconfig wlan0 power off
 
+## getting the hostname by socket.gethostname() method
+hostname = socket.gethostname()
+
+## getting the IP address using socket.gethostbyname() method
+ip_address = socket.gethostbyname(hostname)
+
+## printing the hostname and ip_address
+print(f"Hostname: {hostname}")
+print(f"IP Address: {ip_address}")
+
 # settings for TCP server
-TCP_IP = '192.168.0.116'
+TCP_IP = ip_address
 TCP_PORT = 5001
 
 #encode parameters for image conversion
@@ -41,11 +51,11 @@ while(True):
 		input = conn.recv(11)
 	except socket.error:
 		input = "error"
-		print "Lost connection..."
-	if input == "getNewFrame":
+		print("Lost connection...")
+	if input == b'getNewFrame':
 		# send previous captured frame to server 
 		# (can also be done in different order: first capture then send ->  depends on application)
-		conn.send( str(len(stringData)).ljust(16));
+		conn.send( bytes(str(len(stringData)).ljust(16), encoding = 'utf-8'));
 		conn.send( stringData );
 
 		# Read next frame from Camera
@@ -57,7 +67,7 @@ while(True):
 		# encode image as base64 String
 		result, imgencode = cv2.imencode('.jpg', frame_sm, encode_param)
 		stringData = base64.b64encode(imgencode)
-	elif input == "closeDriver":
+	elif input == b'closeDriver':
 		break
 	else:		
 		print("Waiting for TCP client ...")

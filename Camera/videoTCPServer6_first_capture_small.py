@@ -4,10 +4,6 @@ import cv2
 import numpy
 import base64
 
-# Disable Wifi Powersaving mode for low latency:
-# run 
-# sudo iwconfig wlan0 power off
-
 ## getting the hostname by socket.gethostname() method
 hostname = socket.gethostname()
 
@@ -47,32 +43,32 @@ result, imgencode = cv2.imencode('.jpg', frame, encode_param)
 stringData = base64.b64encode(imgencode)
 
 while(True):
-	try:
-		input = conn.recv(11)
-	except socket.error:
-		input = "error"
-		print("Lost connection...")
-	if input == b'getNewFrame':
-		# Read next frame from Camera
-		ret, frame = capture.read()
-		
-		# optional resizing of frame
-		frame_sm = cv2.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
-		
-		# encode image as base64 String
-		result, imgencode = cv2.imencode('.jpg', frame_sm, encode_param)
-		stringData = base64.b64encode(imgencode)
-		
-		# send captured frame to server 
-		conn.send( bytes(str(len(stringData)).ljust(16), encoding = 'utf-8'));
-		conn.send( stringData );
-	elif input == b'closeDriver':
-		break
-	else:		
-		print("Waiting for TCP client ...")
-		sock.listen(True)
-		conn, addr = sock.accept()
-		print("Connected: " + addr[0]); 
-	
+    try:
+        input = conn.recv(11)
+    except socket.error:
+        input = "error"
+        print("Lost connection...")
+    if input == b'getNewFrame':
+        # Read next frame from Camera
+        ret, frame = capture.read()
+        
+        # optional resizing of frame
+        frame_sm = cv2.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
+        
+        # encode image as base64 String
+        result, imgencode = cv2.imencode('.jpg', frame_sm, encode_param)
+        stringData = base64.b64encode(imgencode)
+        
+        # send captured frame to server 
+        conn.send( bytes(str(len(stringData)).ljust(16), encoding = 'utf-8'));
+        conn.send( stringData );
+    elif input == b'closeDriver':
+        break
+    else:       
+        print("Waiting for TCP client ...")
+        sock.listen(True)
+        conn, addr = sock.accept()
+        print("Connected: " + addr[0]); 
+    
 sock.close()
 cv2.destroyAllWindows() 
