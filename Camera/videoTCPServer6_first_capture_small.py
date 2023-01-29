@@ -3,12 +3,16 @@ import socket
 import cv2
 import numpy
 import base64
+import netifaces as ni
 
 ## getting the hostname by socket.gethostname() method
 hostname = socket.gethostname()
 
-## getting the IP address using socket.gethostbyname() method
-ip_address = socket.gethostbyname(hostname)
+## getting the IP address of wlan0 interface using netifaces method
+try:
+    ip_address = ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr']
+except:
+    ip_address = "127.0.0.1"
 
 ## printing the hostname and ip_address
 print(f"Hostname: {hostname}")
