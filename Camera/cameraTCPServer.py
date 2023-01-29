@@ -6,18 +6,20 @@ import base64
 import netifaces as ni
 
 
-def read_frame_from_camera(capture, scale, encode_param):
+def read_frame_from_camera(capture, scale, rotate, encode_param):
     # Read next frame from Camera
     ret, frame = capture.read()
     # resizing of frame
-    frame_sm = cv2.resize(frame, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+    frame = cv2.resize(frame, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+    if rotate:
+        frame = cv2.rotate(frame, cv2.ROTATE_180)
     # encode image as base64 String
-    result, img_encoded = cv2.imencode('.jpg', frame_sm, encode_param)
+    result, img_encoded = cv2.imencode('.jpg', frame, encode_param)
     stringData = base64.b64encode(img_encoded)
     return stringData
 
 
-def start_server(ip, port, scale):
+def start_server(ip, port, scale, rotate):
     # encode parameters for image conversion
     encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 
@@ -33,7 +35,7 @@ def start_server(ip, port, scale):
     # Connect camera
     capture = cv2.VideoCapture(0)
 
-    stringData = read_frame_from_camera(capture, scale, encode_param)
+    stringData = read_frame_from_camera(capture, scale, rotate, encode_param)
 
     while True:
         try:
@@ -42,7 +44,7 @@ def start_server(ip, port, scale):
             input_command = "error"
             print("Lost connection...")
         if input_command == b'getNewFrame':
-            stringData = read_frame_from_camera(capture, scale, encode_param)
+            stringData = read_frame_from_camera(capture, scale, rotate, encode_param)
 
             # send captured frame to server
             conn.send(bytes(str(len(stringData)).ljust(16), encoding='utf-8'))
@@ -53,7 +55,7 @@ def start_server(ip, port, scale):
             conn.send(bytes(str(len(stringData)).ljust(16), encoding='utf-8'))
             conn.send(stringData)
 
-            stringData = read_frame_from_camera(capture, scale, encode_param)
+            stringData = read_frame_from_camera(capture, scale, rotate, encode_param)
 
         elif input_command == b'closeDriver':
             break
@@ -76,12 +78,15 @@ if __name__ == '__main__':
                     help="ephemeral port number of the server (1024 to 65535), default: 5001")
     ap.add_argument("-s", "--scale", type=float, default=1.0,
                     help="which scaling factor should be applied to the image, default: 1.0")
+    ap.add_argument("-r", "--rotate", type=bool, default=True,
+                    help="whether the image should be rotated by 180 degree, default: True")
     args = vars(ap.parse_args())
 
     print("Start camera TCP server with follow settings: ")
     print('Interface: ', args['interface'])
     print('Port: ', args['port'])
     print('Scale: ', args['scale'])
+    print('Rotate: ', args['rotate'])
 
     try:
         ip_address = ni.ifaddresses(args['interface'])[ni.AF_INET][0]['addr']
@@ -91,4 +96,4 @@ if __name__ == '__main__':
 
     print(f"IP Address: {ip_address}")
 
-    start_server(ip_address, args['port'], args['scale'])
+    start_server(ip_address, args['port'], args['scale'], args['rotate'])
