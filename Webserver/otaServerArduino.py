@@ -33,18 +33,23 @@ class MyHandler(BaseHTTPRequestHandler):
             contentType = client.headers.get('Content-Type')
             filename = client.headers.get('filename')
             open(datapath + filename, 'wb').write(data)
-            call("gpio -g mode 22 out", shell=True)
-            call("gpio -g write 22 0", shell=True)
-            cmd = "/usr/local/bin/avrdude -c linuxspi -P /dev/spidev0.0 -p t84 -b 19200 -Uflash:w:" + datapath + filename + ":i"
-            print(cmd)
-            proc = subprocess.Popen(cmd, stderr=PIPE, shell=True)
-            res = read_stderr(proc)
-            print("Output: " + res)
+
+            result = subprocess.run(['gpio', '-g', 'mode', '22', 'out'], capture_output=True)
+            print(result.stdout)
+
+            result = subprocess.run(['gpio', '-g', 'write', '22', '0'], capture_output=True)
+            print(result.stdout)
+
+            result = subprocess.run(['/usr/bin/avrdude', '-c', 'linuxspi', '-P', '/dev/spidev0.0', '-p', 't84', '-b', '19200', '-Uflash:w:' + datapath + filename + ':i'], capture_output=True)
+            print(result.stdout)
+
             client.send_response(200)
             client.send_header('Content-type', 'text/html')
             client.end_headers()
-            client.wfile.write(res)
-            call("gpio -g write 22 1", shell=True)
+            client.wfile.write(result.stdout)
+
+            result = subprocess.run(['gpio', '-g', 'write', '22', '1'], capture_output=True)
+            print(result.stdout)
 
 
 def read_stderr(proc):
