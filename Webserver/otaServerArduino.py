@@ -34,22 +34,24 @@ class MyHandler(BaseHTTPRequestHandler):
             filename = client.headers.get('filename')
             open(datapath + filename, 'wb').write(data)
 
-            result = subprocess.run(['gpio', '-g', 'mode', '22', 'out'], capture_output=True)
-            print(result.stdout)
+            result = subprocess.run(['gpio', '-g', 'mode', '22', 'out'], capture_output=True, text=True)
+            print(" ".join(result.args))
 
-            result = subprocess.run(['gpio', '-g', 'write', '22', '0'], capture_output=True)
-            print(result.stdout)
+            result = subprocess.run(['gpio', '-g', 'write', '22', '0'], capture_output=True, text=True)
+            print(" ".join(result.args))
 
-            result = subprocess.run(['/usr/bin/avrdude', '-c', 'linuxspi', '-P', '/dev/spidev0.0', '-p', 't84', '-b', '19200', '-Uflash:w:' + datapath + filename + ':i'], capture_output=True)
-            print(result.stdout)
+            result = subprocess.run(['/usr/bin/avrdude', '-c', 'linuxspi', '-P', '/dev/spidev0.0', '-p', 't84', '-b', '19200', '-Uflash:w:' + datapath + filename + ':i'], capture_output=True, text=True)
+            print("command: ", " ".join(result.args))
+            print("stderr: ", result.stderr)
+            print("stdout: ", result.stdout)
 
             client.send_response(200)
             client.send_header('Content-type', 'text/html')
             client.end_headers()
-            client.wfile.write(result.stdout)
+            client.wfile.write(("Flashresult: \n" + result.stdout + result.stderr).encode())
 
-            result = subprocess.run(['gpio', '-g', 'write', '22', '1'], capture_output=True)
-            print(result.stdout)
+            result = subprocess.run(['gpio', '-g', 'write', '22', '1'], capture_output=True, text=True)
+            print(" ".join(result.args))
 
 
 def read_stderr(proc):
