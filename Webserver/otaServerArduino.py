@@ -1,6 +1,14 @@
+"""
+otaServerArduino.py
+
+Created on Sat Apr 27 2019
+Updated on Wed Feb 01 2023
+
+@author: Techniccontroller
+"""
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import subprocess
-from subprocess import call, PIPE
 
 # path to the folder with the temporary stored file
 datapath = ""
