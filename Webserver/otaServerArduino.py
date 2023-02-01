@@ -16,15 +16,17 @@ class MyHandler(BaseHTTPRequestHandler):
             contentType = client.headers.get('Content-Type')
             filename = client.headers.get('filename')
             open(datapath + filename, 'wb').write(data)
-            cmd = "/usr/share/arduino/hardware/tools/avrdude -C /usr/share/arduino/hardware/tools/avrdude.conf -v -p atmega2560 -c wiring -P /dev/arduino -b 115200 -D -Uflash:w:" + datapath + filename + ":i"
-            print(cmd)
-            proc = subprocess.Popen(cmd, stderr=PIPE, shell=True)
-            res = read_stderr(proc)
-            print("Output: " + res)
+
+            result = subprocess.run(
+                ['/usr/share/arduino/hardware/tools/avrdude', '-C', '/usr/share/arduino/hardware/tools/avrdude.conf', '-v', '-p', 'atmega2560', '-c', 'wiring', '-P', '/dev/arduino', '-b', '115200', '-D', '-Uflash:w:' + datapath + filename + ':i'], capture_output=True, text=True)
+            print("command: ", " ".join(result.args))
+            print("stderr: ", result.stderr)
+            print("stdout: ", result.stdout)
+
             client.send_response(200)
             client.send_header('Content-type', 'text/html')
             client.end_headers()
-            client.wfile.write(res)
+            client.wfile.write(("Flashresult: \n" + result.stdout + result.stderr).encode())
 
         elif client.path == "/postAttinyISPCode":
             # a new file for Arduino is coming
