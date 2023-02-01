@@ -1,7 +1,6 @@
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer
 import subprocess
 from subprocess import call, PIPE
-import time
 
 # path to the folder with the temporary stored file
 datapath = ""
@@ -24,7 +23,7 @@ class MyHandler(BaseHTTPRequestHandler):
             print("Output: " + res)
             client.send_response(200)
             client.send_header('Content-type', 'text/html')
-            client.end_headers();
+            client.end_headers()
             client.wfile.write(res)
 
         elif client.path == "/postAttinyISPCode":
@@ -43,7 +42,7 @@ class MyHandler(BaseHTTPRequestHandler):
             print("Output: " + res)
             client.send_response(200)
             client.send_header('Content-type', 'text/html')
-            client.end_headers();
+            client.end_headers()
             client.wfile.write(res)
             call("gpio -g write 22 1", shell=True)
 
